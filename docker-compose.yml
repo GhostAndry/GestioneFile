@@ -1,0 +1,36 @@
+services:
+  backend:
+    build: ./backend
+    container_name: miniupload-backend
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - uploads:/app/uploads
+      - db_data:/app/db
+    environment:
+      - PORT=3001
+      - JWT_SECRET=supersegreto123
+    depends_on:
+      - db
+
+  # frontend:
+  #   build: ./frontend
+  #   container_name: miniupload-frontend
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend:/app
+  #   environment:
+  #     - VITE_API_URL=http://localhost:3001
+
+  db:
+    image: nouchka/sqlite3
+    container_name: miniupload-db
+    volumes:
+      - db_data:/root/db
+    command: tail -f /dev/null
+
+
+volumes:
+  uploads:
