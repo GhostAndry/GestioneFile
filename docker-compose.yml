@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   backend:
     build: ./backend
@@ -6,31 +8,33 @@ services:
       - "3001:3001"
     volumes:
       - ./backend:/app
-      - uploads:/app/uploads
-      - db_data:/app/db
-    environment:
-      - PORT=3001
-      - JWT_SECRET=supersegreto123
+      - ./backend/uploads:/app/uploads
     depends_on:
       - db
-
-  # frontend:
-  #   build: ./frontend
-  #   container_name: miniupload-frontend
-  #   ports:
-  #     - "5173:5173"
-  #   volumes:
-  #     - ./frontend:/app
-  #   environment:
-  #     - VITE_API_URL=http://localhost:3001
+    env_file:
+      - ./backend/.env
+    networks:
+      - miniupload-net
 
   db:
-    image: nouchka/sqlite3
-    container_name: miniupload-db
+    image: mariadb:11
+    container_name: miniuploaddb
+    restart: unless-stopped
+    ports:
+      - "3308:3306"  # ← porta esterna 3307
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_DATABASE=miniupload_db
+      - MARIADB_USER=miniupload
+      - MARIADB_PASSWORD=miniupload
     volumes:
-      - db_data:/root/db
-    command: tail -f /dev/null
-
+      - db_data:/var/lib/mysql
+    networks:
+      - miniupload-net
 
 volumes:
-  uploads:
+  db_data:
+
+networks:
+  miniupload-net:
+    driver: bridge

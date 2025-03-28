@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Funzione per verificare errori
+check_error() {
+    if [ $? -ne 0 ]; then
+        echo "Errore durante: $1"
+        exit 1
+    fi
+}
+
+# Aggiorna il sistema
+echo "Aggiornamento del sistema..."
+sudo pacman -Syu --noconfirm
+check_error "aggiornamento del sistema"
+
+# Installa Spotify
+echo "Installazione di Spotify..."
+sudo pacman -S --needed --noconfirm spotify
+check_error "installazione di Spotify"
+
+# Installa Spicetify CLI
+echo "Installazione di Spicetify CLI..."
+sudo pacman -S --needed --noconfirm spicetify-cli
+check_error "installazione di Spicetify CLI"
+
+# Configura Spicetify
+echo "Configurazione di Spicetify..."
+spicetify backup apply
+check_error "configurazione di Spicetify"
+
+# Messaggio finale
+echo "Installazione completata! Puoi avviare Spotify e personalizzarlo con Spicetify."
+

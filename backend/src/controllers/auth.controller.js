@@ -2,77 +2,79 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("../db");
 
+console.log("✅ auth.controller.js caricato");
+
 const SECRET = process.env.JWT_SECRET || "miniupload-secret";
 
 const AuthController = {
-    register: (req, res) => {
+    register: async (req, res) => {
         const { username, password } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ error: "Missing fields" });
         }
 
-        const hashed = bcrypt.hashSync(password, 10);
+        try {
+            const hashed = bcrypt.hashSync(password, 10);
 
-        db.get("SELECT COUNT(*) as count FROM users", [], (err, row) => {
-            if (err) return res.status(500).json({ error: err.message });
+            const [users] = await db.query("SELECT COUNT(*) as count FROM users");
+            const isAdmin = users[0].count === 0 ? 1 : 0;
 
-            const isAdmin = row.count === 0 ? 1 : 0;
-
-            db.run(
+            await db.query(
                 "INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)",
-                [username, hashed, isAdmin],
-                function (err) {
-                    if (err)
-                        return res
-                            .status(500)
-                            .json({ error: "Username already exists" });
-
-                    return res
-                        .status(201)
-                        .json({ id: this.lastID, username, is_admin: isAdmin });
-                }
+                [username, hashed, isAdmin]
             );
-        });
+
+            const [userRow] = await db.query("SELECT id FROM users WHERE username = ?", [username]);
+
+            return res.status(201).json({
+                id: userRow[0].id,
+                username,
+                is_admin: isAdmin
+            });
+        } catch (err) {
+            if (err.code === "ER_DUP_ENTRY") {
+                return res.status(409).json({ error: "Username already exists" });
+            }
+            console.error("❌ Register Error:", err.message);
+            return res.status(500).json({ error: "Internal server error" });
+        }
     },
 
-    login: (req, res) => {
+    login: async (req, res) => {
         const { username, password } = req.body;
 
         if (!username || !password) {
             return res.status(400).json({ error: "Missing fields" });
         }
 
-        db.get(
-            "SELECT * FROM users WHERE username = ?",
-            [username],
-            (err, user) => {
-                if (err) return res.status(500).json({ error: err.message });
-                if (!user)
-                    return res
-                        .status(401)
-                        .json({ error: "Invalid credentials" });
+        try {
+            const [users] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
 
-                const valid = bcrypt.compareSync(password, user.password);
-                if (!valid)
-                    return res
-                        .status(401)
-                        .json({ error: "Invalid credentials" });
-
-                const token = jwt.sign(
-                    {
-                        id: user.id,
-                        username: user.username,
-                        is_admin: !!user.is_admin,
-                    },
-                    SECRET,
-                    { expiresIn: "2h" }
-                );
-
-                return res.status(200).json({ token });
+            if (users.length === 0) {
+                return res.status(401).json({ error: "Invalid credentials" });
             }
-        );
-    },
+
+            const user = users[0];
+            const valid = bcrypt.compareSync(password, user.password);
+            if (!valid) return res.status(401).json({ error: "Invalid credentials" });
+
+            const token = jwt.sign(
+                {
+                    id: user.id,
+                    username: user.username,
+                    is_admin: !!user.is_admin
+                },
+                SECRET,
+                { expiresIn: "2h" }
+            );
+
+            return res.status(200).json({ token });
+        } catch (err) {
+            console.error("❌ Login Error:", err.message);
+            return res.status(500).json({ error: "Internal server error" });
+        }
+    }
 };
 
 module.exports = AuthController;

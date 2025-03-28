@@ -1,77 +1,73 @@
-const crypto = require("crypto");
 const path = require("path");
 const fs = require("fs");
 const db = require("../db");
 
-function generateDownloadId() {
-    return crypto.randomBytes(6).toString("hex"); // tipo "4f9c2a6e4d91"
-}
+console.log("✅ files.controller.js caricato");
 
 const FilesController = {
-    upload: (req, res) => {
-        if (!req.file) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
+    upload: async (req, res) => {
+        try {
+            console.log("🔥 Upload triggered");
 
-        const file = req.file;
-        const now = new Date().toISOString();
-        const downloadId = generateDownloadId();
+            const userId = req.user.id;
+            const file = req.file;
 
-        db.run(
-            `
-            INSERT INTO files (user_id, filename, original_name, size, upload_date, download_id)
-            VALUES (?, ?, ?, ?, ?, ?)
-        `,
-            [
-                req.user.id,
-                file.originalname,
+            if (!file) {
+                return res.status(400).json({ error: "Nessun file caricato" });
+            }
+
+            const downloadId = Math.random().toString(36).substring(2, 10);
+            const now = new Date();
+
+            await db.query(`
+                INSERT INTO files (user_id, filename, original_name, size, upload_date, download_id)
+                VALUES (?, ?, ?, ?, ?, ?)
+            `, [
+                userId,
+                file.filename,
                 file.originalname,
                 file.size,
                 now,
-                downloadId,
-            ],
-            function (err) {
-                if (err) return res.status(500).json({ error: err.message });
+                downloadId
+            ]);
 
-                return res.status(201).json({
-                    id: this.lastID,
-                    filename: file.originalname,
-                    size: file.size,
-                    download_url: `/files/download/${downloadId}`,
-                });
-            }
-        );
+            return res.status(200).json({
+                message: "✅ Upload completato",
+                download_id: downloadId
+            });
+        } catch (err) {
+            console.error("❌ Upload error:", err.message);
+            return res.status(500).json({ error: "Errore durante l'upload" });
+        }
     },
 
-    download: (req, res) => {
-        const { filename } = req.params;
+    download: async (req, res) => {
+        try {
+            console.log("📥 Download richiesto");
 
-        db.get(
-            "SELECT * FROM files WHERE download_id = ?",
-            [filename],
-            (err, file) => {
-                if (err) return res.status(500).json({ error: err.message });
-                if (!file)
-                    return res.status(404).json({ error: "File not found" });
+            const { download_id } = req.params;
 
-                const filePath = path.join(
-                    __dirname,
-                    "..",
-                    "..",
-                    "uploads",
-                    String(file.user_id),
-                    file.original_name
-                );
-                if (!fs.existsSync(filePath)) {
-                    return res
-                        .status(404)
-                        .json({ error: "File does not exist on disk" });
-                }
+            const [rows] = await db.query(`
+                SELECT * FROM files WHERE download_id = ?
+            `, [download_id]);
 
-                res.download(filePath, file.original_name);
+            if (rows.length === 0) {
+                return res.status(404).json({ error: "File non trovato" });
             }
-        );
-    },
+
+            const file = rows[0];
+            const filePath = path.join(__dirname, "..", "..", "uploads", String(file.user_id), file.filename);
+
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).json({ error: "File non presente su disco" });
+            }
+
+            res.download(filePath, file.original_name);
+        } catch (err) {
+            console.error("❌ Download error:", err.message);
+            return res.status(500).json({ error: "Errore durante il download" });
+        }
+    }
 };
 
 module.exports = FilesController;

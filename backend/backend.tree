@@ -3,13 +3,13 @@
 ├── package.json
 ├── package-lock.json
 ├── src
+│   ├── db.js
 │   ├── app.js
-│   ├── controllers
+│   ├── index.js
+│   ├── controllers/
 │   │   ├── auth.controller.js
 │   │   └── files.controller.js
-│   ├── db.js
-│   ├── index.js
-│   └── routes
+│   └── routes/
 │       ├── auth.routes.js
 │       └── files.routes.js
 └── tree.txt
