@@ -10,7 +10,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         "password" => $password
     ];
 
-    $ch = curl_init("http://backend:3001/auth/login"); // usa 'backend' come host Docker interno
+    $ch = curl_init("http://backend:3001/auth/login");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, [

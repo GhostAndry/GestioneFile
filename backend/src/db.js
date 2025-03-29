@@ -79,7 +79,6 @@ async function waitForDB(retries = 20, delay = 1000) {
     }
 })();
 
-// 🧼 Optional: graceful shutdown
 process.on("SIGINT", async () => {
     console.log("👋 Closing MariaDB pool...");
     if (pool) await pool.end();

@@ -8,8 +8,7 @@ if (!isset($_SESSION["token"])) {
 
 $token = $_SESSION["token"];
 
-// 🔄 Recupero lista file dal backend
-$ch = curl_init("http://backend:3001/files/list"); // <-- Host corretto: "backend"
+$ch = curl_init("http://backend:3001/files/list");
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Authorization: Bearer $token"
