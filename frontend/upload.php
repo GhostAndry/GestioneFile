@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// ⚠️ Check se utente loggato
 if (!isset($_SESSION["token"])) {
     header("Location: login.php");
     exit;
@@ -25,7 +24,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && !empty($_FILES["files"])) {
             continue;
         }
 
-        // Invia file al backend
         $ch = curl_init("http://miniupload-backend:3001/files/upload");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
