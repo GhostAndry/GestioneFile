@@ -1,0 +1,139 @@
+/* 🌙 Dark Mode - MiniUpload Glassy Deluxe */
+body {
+    background: linear-gradient(135deg, #121212, #1c1c1c);
+    color: #e0e0e0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.page-wrapper {
+    padding: 2rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    color: #ffffff;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-shadow: 1px 1px 2px #000;
+}
+
+/* 🎨 Navbar */
+.navbar {
+    background: rgba(30, 30, 30, 0.7) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.navbar .navbar-brand,
+.navbar .nav-link {
+    color: #fff !important;
+    font-weight: 500;
+}
+
+.navbar .nav-link:hover {
+    color: #00bcd4 !important;
+    transition: 0.3s;
+}
+
+/* 📦 Cards / Forms */
+.form-box,
+.card,
+.alert,
+.table {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+/* 🧮 Buttons */
+.main-btn {
+    background-color: #00bcd4;
+    color: #fff;
+    border: none;
+    transition: 0.3s;
+    border-radius: 10px;
+}
+
+.main-btn:hover {
+    background-color: #0199a9;
+    transform: scale(1.03);
+    box-shadow: 0 0 12px rgba(0, 188, 212, 0.5);
+}
+
+.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #eee;
+    border: none;
+    border-radius: 10px;
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 📊 Table */
+.table {
+    color: #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.table th {
+    background-color: rgba(40, 40, 40, 0.8);
+    color: #fff !important;
+}
+
+.table td {
+    background-color: rgba(30, 30, 30, 0.6);
+    color: #fff !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(40, 40, 40, 0.3);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 🚨 Alerts */
+.alert-danger {
+    background-color: rgba(100, 0, 0, 0.6);
+    color: #ff9999;
+}
+
+.alert-info {
+    background-color: rgba(40, 40, 80, 0.6);
+    color: #cceeff;
+}
+
+/* 🏁 File Upload Box */
+.file-box {
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed #00bcd4;
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    color: #aaa;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.file-box:hover {
+    border-color: #01acc1;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(0, 188, 212, 0.2);
+}
