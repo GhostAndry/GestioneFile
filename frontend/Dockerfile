@@ -1,11 +1,12 @@
-FROM node:20-alpine
+FROM php:8.2-apache
 
-WORKDIR /app
+RUN a2enmod rewrite
+RUN docker-php-ext-install session
 
-COPY package*.json ./
-RUN npm install
+COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 
-COPY . .
+RUN mkdir -p /var/lib/php/sessions \
+    && chown -R www-data:www-data /var/lib/php/sessions \
+    && chmod 700 /var/lib/php/sessions
 
-CMD [npm, run, dev]
-
+COPY . /var/www/html

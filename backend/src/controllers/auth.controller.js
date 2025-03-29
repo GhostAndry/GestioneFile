@@ -17,7 +17,9 @@ const AuthController = {
         try {
             const hashed = bcrypt.hashSync(password, 10);
 
-            const [users] = await db.query("SELECT COUNT(*) as count FROM users");
+            const [users] = await db.query(
+                "SELECT COUNT(*) as count FROM users"
+            );
             const isAdmin = users[0].count === 0 ? 1 : 0;
 
             await db.query(
@@ -25,16 +27,35 @@ const AuthController = {
                 [username, hashed, isAdmin]
             );
 
-            const [userRow] = await db.query("SELECT id FROM users WHERE username = ?", [username]);
+            const [userRow] = await db.query(
+                "SELECT id FROM users WHERE username = ?",
+                [username]
+            );
+            const userId = userRow[0].id;
+
+            const token = jwt.sign(
+                {
+                    id: userId,
+                    username,
+                    is_admin: !!isAdmin,
+                },
+                SECRET,
+                { expiresIn: "2h" }
+            );
+
+            console.log(`✅ Utente registrato e token generato: ${username}`);
 
             return res.status(201).json({
-                id: userRow[0].id,
+                id: userId,
                 username,
-                is_admin: isAdmin
+                is_admin: isAdmin,
+                token,
             });
         } catch (err) {
             if (err.code === "ER_DUP_ENTRY") {
-                return res.status(409).json({ error: "Username already exists" });
+                return res
+                    .status(409)
+                    .json({ error: "Username already exists" });
             }
             console.error("❌ Register Error:", err.message);
             return res.status(500).json({ error: "Internal server error" });
@@ -49,7 +70,10 @@ const AuthController = {
         }
 
         try {
-            const [users] = await db.query("SELECT * FROM users WHERE username = ?", [username]);
+            const [users] = await db.query(
+                "SELECT * FROM users WHERE username = ?",
+                [username]
+            );
 
             if (users.length === 0) {
                 return res.status(401).json({ error: "Invalid credentials" });
@@ -57,24 +81,32 @@ const AuthController = {
 
             const user = users[0];
             const valid = bcrypt.compareSync(password, user.password);
-            if (!valid) return res.status(401).json({ error: "Invalid credentials" });
+            if (!valid)
+                return res.status(401).json({ error: "Invalid credentials" });
 
             const token = jwt.sign(
                 {
                     id: user.id,
                     username: user.username,
-                    is_admin: !!user.is_admin
+                    is_admin: !!user.is_admin,
                 },
                 SECRET,
                 { expiresIn: "2h" }
             );
 
-            return res.status(200).json({ token });
+            console.log(`✅ Login riuscito: ${username}, token creato`);
+
+            return res.status(200).json({
+                id: user.id,
+                username: user.username,
+                is_admin: !!user.is_admin,
+                token,
+            });
         } catch (err) {
             console.error("❌ Login Error:", err.message);
             return res.status(500).json({ error: "Internal server error" });
         }
-    }
+    },
 };
 
 module.exports = AuthController;

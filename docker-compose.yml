@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   backend:
     build: ./backend
@@ -16,12 +14,28 @@ services:
     networks:
       - miniupload-net
 
+  frontend:
+    image: php:8.2-apache
+    container_name: miniupload-frontend
+    build: ./frontend
+    ports:
+      - "8080:80"
+    volumes:
+      - ./frontend:/var/www/html
+      - ./frontend/php.ini:/usr/local/etc/php/php.ini
+      - /tmp/php-sessions:/var/lib/php/sessions
+    depends_on:
+      - backend
+    networks:
+      - miniupload-net
+
+
   db:
     image: mariadb:11
     container_name: miniuploaddb
     restart: unless-stopped
     ports:
-      - "3308:3306"  # ← porta esterna 3307
+      - "3308:3306"
     environment:
       - MARIADB_ROOT_PASSWORD=root
       - MARIADB_DATABASE=miniupload_db

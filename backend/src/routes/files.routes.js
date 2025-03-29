@@ -1,16 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const jwt = require("jsonwebtoken");
 const FilesController = require("../controllers/files.controller");
-
-console.log("✅ files.routes.js caricato");
+const jwt = require("jsonwebtoken");
 
 const SECRET = process.env.JWT_SECRET || "miniupload-secret";
 
-// Middleware di verifica token
 function verifyToken(req, res, next) {
-    const authHeader = req.headers.authorization;
+    const authHeader = req.headers["authorization"];
     if (!authHeader) return res.status(401).json({ error: "Missing token" });
 
     const token = authHeader.split(" ")[1];
@@ -21,10 +17,8 @@ function verifyToken(req, res, next) {
     });
 }
 
-// Multer temporaneo
-const upload = multer({ dest: "uploads/tmp" });
-
-router.post("/upload", verifyToken, upload.single("file"), FilesController.upload);
+router.post("/upload", verifyToken, FilesController.upload);
+router.get("/list", verifyToken, FilesController.list);
 router.get("/download/:filename", FilesController.download);
 
 module.exports = router;

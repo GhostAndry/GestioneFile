@@ -2,6 +2,7 @@
 ├── Dockerfile
 ├── package.json
 ├── package-lock.json
+├── .env
 ├── src
 │   ├── db.js
 │   ├── app.js

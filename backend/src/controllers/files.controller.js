@@ -5,69 +5,68 @@ const db = require("../db");
 console.log("✅ files.controller.js caricato");
 
 const FilesController = {
-    upload: async (req, res) => {
-        try {
-            console.log("🔥 Upload triggered");
+    upload: (req, res) => {
+        const file = req.file;
+        const userId = req.user.id;
 
-            const userId = req.user.id;
-            const file = req.file;
+        if (!file)
+            return res.status(400).json({ error: "Nessun file inviato" });
 
-            if (!file) {
-                return res.status(400).json({ error: "Nessun file caricato" });
-            }
+        const stmt = db.pool().prepare(`
+            INSERT INTO files (user_id, filename, original_name, size, upload_date, download_id)
+            VALUES (?, ?, ?, ?, NOW(), ?)
+        `);
 
-            const downloadId = Math.random().toString(36).substring(2, 10);
-            const now = new Date();
+        const downloadId = Math.random().toString(36).substring(2, 12);
 
-            await db.query(`
-                INSERT INTO files (user_id, filename, original_name, size, upload_date, download_id)
-                VALUES (?, ?, ?, ?, ?, ?)
-            `, [
-                userId,
-                file.filename,
-                file.originalname,
-                file.size,
-                now,
-                downloadId
-            ]);
+        stmt.execute([
+            userId,
+            file.filename,
+            file.originalname,
+            file.size,
+            downloadId,
+        ]);
 
-            return res.status(200).json({
-                message: "✅ Upload completato",
-                download_id: downloadId
-            });
-        } catch (err) {
-            console.error("❌ Upload error:", err.message);
-            return res.status(500).json({ error: "Errore durante l'upload" });
-        }
+        res.status(200).json({
+            message: "Upload completato",
+            download_id: downloadId,
+        });
+    },
+
+    list: async (req, res) => {
+        const userId = req.user.id;
+        const [rows] = await db.query("SELECT * FROM files WHERE user_id = ?", [
+            userId,
+        ]);
+        res.status(200).json(rows);
     },
 
     download: async (req, res) => {
-        try {
-            console.log("📥 Download richiesto");
+        const downloadId = req.params.filename;
+        const [rows] = await db.query(
+            "SELECT * FROM files WHERE download_id = ?",
+            [downloadId]
+        );
 
-            const { download_id } = req.params;
+        if (rows.length === 0)
+            return res.status(404).json({ error: "File non trovato" });
 
-            const [rows] = await db.query(`
-                SELECT * FROM files WHERE download_id = ?
-            `, [download_id]);
+        const file = rows[0];
+        const filePath = path.join(
+            __dirname,
+            "..",
+            "uploads",
+            String(file.user_id),
+            file.filename
+        );
 
-            if (rows.length === 0) {
-                return res.status(404).json({ error: "File non trovato" });
-            }
+        if (!fs.existsSync(filePath))
+            return res
+                .status(404)
+                .json({ error: "File non trovato sul server" });
 
-            const file = rows[0];
-            const filePath = path.join(__dirname, "..", "..", "uploads", String(file.user_id), file.filename);
-
-            if (!fs.existsSync(filePath)) {
-                return res.status(404).json({ error: "File non presente su disco" });
-            }
-
-            res.download(filePath, file.original_name);
-        } catch (err) {
-            console.error("❌ Download error:", err.message);
-            return res.status(500).json({ error: "Errore durante il download" });
-        }
-    }
+        res.download(filePath, file.original_name);
+    },
 };
 
 module.exports = FilesController;
