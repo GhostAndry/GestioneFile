@@ -20,6 +20,7 @@
 -- Current Database: `miniupload_db`
 --
 
+DROP DATABASE IF EXISTS `miniupload_db` /*!32312 CASCADE */;
 CREATE DATABASE /*!32312 IF NOT EXISTS*/ `miniupload_db` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_uca1400_ai_ci */;
 
 USE `miniupload_db`;
@@ -47,17 +48,6 @@ CREATE TABLE `files` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `files`
---
-
-LOCK TABLES `files` WRITE;
-/*!40000 ALTER TABLE `files` DISABLE KEYS */;
-INSERT INTO `files` VALUES
-(2,1,'uj73ntdzyn.jpg','immagine_libro.png',10026097,'2025-03-29 15:29:37','hcwav2cihi');
-/*!40000 ALTER TABLE `files` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `users`
 --
 
@@ -81,8 +71,7 @@ CREATE TABLE `users` (
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` VALUES
-(1,'andrea@ronzoni.it','$2b$10$Ut.tZ6ol15/JwHKm7Fqy1uVtywAf86B49PRmG61MAGYCX1JgzxF/K',1),
-(2,'test1','$2b$10$iisortPHykt.bGGe0FOhsuLaXSBKGfeu9IBvoZQmpzx5Co6fS8m3S',0);
+(1,'andrea@ronzoni.it','$2b$10$Ut.tZ6ol15/JwHKm7Fqy1uVtywAf86B49PRmG61MAGYCX1JgzxF/K',1);
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
