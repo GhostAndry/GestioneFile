@@ -1,4 +1,4 @@
-FROM node:20-slim
+FROM node:23-slim
 
 WORKDIR /app
 
@@ -8,5 +8,3 @@ RUN npm install
 COPY . .
 
 CMD ["npm", "run", "dev"]
-
-

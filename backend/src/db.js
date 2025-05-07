@@ -10,7 +10,6 @@ const {
 
 let pool;
 
-// ⏳ Retry finché MariaDB non risponde
 async function waitForDB(retries = 20, delay = 1000) {
     for (let i = 0; i < retries; i++) {
         try {
