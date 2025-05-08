@@ -67,16 +67,48 @@ if ($status === 200) {
                                     target="_blank">Scarica</a>
 
                                 <button class="btn btn-sm btn-warning"
-                                    onclick="renameFile('<?= $file["download_id"] ?>')">Rinomina</button>
+                                    onclick="renameFile('<?= $file["download_id"] ?>')">Rinomina
+                                </button>
 
                                 <button class="btn btn-sm btn-danger"
-                                    onclick="deleteFile('<?= $file["download_id"] ?>')">Elimina</button>
+                                    onclick="deleteFile('<?= $file["download_id"] ?>')">Elimina
+                                </button>
+
+                                <button class="btn btn-sm btn-info share-btn"
+                                    data-download-id="<?= $file['download_id'] ?>"
+                                    data-original-name="<?= htmlspecialchars($file['original_name']) ?>">
+                                    🔗 Condividi
+                                </button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         <?php endif; ?>
+    </div>
+
+    <div id="shareModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span id="closeModal" style="float:right;cursor:pointer;">&times;</span>
+            <h3>Condividi file: <span id="modalFilename"></span></h3>
+
+            <label>
+                <input type="checkbox" id="isShared"> Condividi file
+            </label><br>
+
+            <label>Tipo condivisione:</label>
+            <select id="sharedMode">
+                <option value="">-- Seleziona --</option>
+                <option value="public">Pubblica (chiunque col link)</option>
+                <option value="private">Privata (solo utenti specifici)</option>
+            </select><br>
+
+            <label>Utenti autorizzati (solo per privata):</label>
+            <input type="text" id="sharedWith" placeholder="ID utente separati da virgola"><br>
+
+            <button id="saveShare">💾 Salva</button>
+            <p id="shareLink" style="margin-top: 10px;"></p>
+        </div>
     </div>
 
     <script>
@@ -91,11 +123,8 @@ if ($status === 200) {
                     "Authorization": `Bearer ${token}`
                 }
             }).then(res => {
-                if (res.ok) {
-                    document.getElementById(`row-${downloadId}`).remove();
-                } else {
-                    alert("Errore durante l'eliminazione del file");
-                }
+                if (res.ok) document.getElementById(`row-${downloadId}`).remove();
+                else alert("Errore durante l'eliminazione del file");
             });
         }
 
@@ -113,15 +142,62 @@ if ($status === 200) {
                     newName
                 })
             }).then(res => {
-                if (res.ok) {
-                    location.reload(); // ricarica per aggiornare i nomi
-                } else {
-                    alert("Errore durante la rinomina del file");
-                }
+                if (res.ok) location.reload();
+                else alert("Errore durante la rinomina del file");
             });
         }
+
+        document.querySelectorAll('.share-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.downloadId;
+                const name = btn.dataset.originalName;
+
+                document.getElementById('modalFilename').innerText = name;
+                document.getElementById('shareModal').style.display = 'flex';
+                document.getElementById('saveShare').dataset.id = id;
+                document.getElementById('shareLink').innerHTML = '';
+            });
+        });
+
+        document.getElementById('closeModal').onclick = () => {
+            document.getElementById('shareModal').style.display = 'none';
+        };
+
+        document.getElementById('saveShare').onclick = async () => {
+            const id = document.getElementById('saveShare').dataset.id;
+            const isShared = document.getElementById('isShared').checked;
+            const mode = document.getElementById('sharedMode').value;
+            const sharedWith = document.getElementById('sharedWith').value
+                .split(',').map(s => s.trim()).filter(Boolean);
+
+            const res = await fetch(`http://localhost:3001/files/${id}/share`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({
+                    is_shared: isShared,
+                    shared_mode: mode || null,
+                    shared_with: mode === 'private' ? sharedWith : null
+                })
+            });
+
+            const result = await res.json();
+
+            if (res.ok) {
+                const shareUrl = `${window.location.origin}/api/files/shared/${id}`;
+                document.getElementById('shareLink').innerHTML = `
+            ✅ Condivisione aggiornata!<br>
+            <input type="text" readonly value="${shareUrl}" onclick="this.select()">
+        `;
+            } else {
+                document.getElementById('shareLink').innerText = "❌ Errore: " + (result?.error || 'Sconosciuto');
+            }
+        };
     </script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>
+
 </html>

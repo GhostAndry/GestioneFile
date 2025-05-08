@@ -23,6 +23,7 @@ services:
     volumes:
       - ./frontend:/var/www/html
       - ./frontend/php.ini:/usr/local/etc/php/php.ini
+      - ./frontend/apache.conf:/etc/apache2/sites-available/000-default.conf
       - /tmp/php-sessions:/var/lib/php/sessions
     depends_on:
       - backend

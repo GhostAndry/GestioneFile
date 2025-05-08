@@ -137,3 +137,116 @@ h5 {
     color: #fff;
     box-shadow: 0 0 12px rgba(0, 188, 212, 0.2);
 }
+
+/* 🌐 Modal Glassy Style */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 188, 212, 0.2);
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 480px;
+    color: #fff;
+}
+
+.modal-content h3 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+}
+
+.modal-content label {
+    display: block;
+    margin-top: 1rem;
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+    color: #e0e0e0;
+}
+
+.modal-content input[type="text"],
+.modal-content select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+.modal-content input::placeholder {
+    color: #ccc;
+}
+
+.modal-content button {
+    background-color: #00bcd4;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 1rem;
+    font-weight: bold;
+}
+
+.modal-content button:hover {
+    background-color: #0199a9;
+    box-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+}
+
+#shareLink {
+    margin-top: 1rem;
+    color: #cceeff;
+    text-align: center;
+}
+
+#shareLink input {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    padding: 8px;
+    width: 100%;
+    margin-top: 8px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.modal-content select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    width: 100%;
+    font-size: 1rem;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='5'%3E%3Cpath fill='%23fff' d='M0,0 l5,5 5,-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 10px 5px;
+    cursor: pointer;
+}
+
+.modal-content select option {
+    background: #1e1e1e;
+    color: #fff;
+}

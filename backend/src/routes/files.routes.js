@@ -53,5 +53,7 @@ router.get("/list", verifyToken, FilesController.list);
 router.get("/download/:filename", FilesController.download);
 router.delete("/delete/:downloadId", verifyToken, FilesController.delete);
 router.patch("/rename/:downloadId", verifyToken, FilesController.rename);
+router.put("/:downloadId/share", verifyToken, FilesController.updateSharing);
+router.get("/shared/:download_id", FilesController.getSharedFile);
 
 module.exports = router;
