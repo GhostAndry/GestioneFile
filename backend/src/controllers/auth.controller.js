@@ -47,7 +47,7 @@ const AuthController = {
 
             return res.status(201).json({
                 id: userId,
-                username,
+                username: user.username,
                 is_admin: isAdmin,
                 token,
             });

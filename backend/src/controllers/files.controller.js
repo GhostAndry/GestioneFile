@@ -28,7 +28,7 @@ const FilesController = {
                         file.filename,
                         file.originalname,
                         file.size,
-                        downloadId
+                        downloadId,
                     ]
                 );
 
@@ -48,35 +48,53 @@ const FilesController = {
 
     list: async (req, res) => {
         const userId = req.user.id;
-        const [rows] = await db.query("SELECT * FROM files WHERE user_id = ?", [userId]);
+        const [rows] = await db.query("SELECT * FROM files WHERE user_id = ?", [
+            userId,
+        ]);
         res.status(200).json(rows);
     },
 
     download: async (req, res) => {
         const downloadId = req.params.filename;
-        const [rows] = await db.query("SELECT * FROM files WHERE download_id = ?", [downloadId]);
+        const [rows] = await db.query(
+            "SELECT * FROM files WHERE download_id = ?",
+            [downloadId]
+        );
 
         if (rows.length === 0)
             return res.status(404).json({ error: "File non trovato" });
 
         const file = rows[0];
-        const filePath = path.join("/app/uploads", String(file.user_id), file.filename);
+        const filePath = path.join(
+            "/app/uploads",
+            String(file.user_id),
+            file.filename
+        );
 
         if (!fs.existsSync(filePath))
-            return res.status(404).json({ error: "File non trovato sul server" });
+            return res
+                .status(404)
+                .json({ error: "File non trovato sul server" });
 
         res.download(filePath, file.original_name);
     },
 
     delete: async (req, res) => {
         const downloadId = req.params.downloadId;
-        const [rows] = await db.query("SELECT * FROM files WHERE download_id = ?", [downloadId]);
+        const [rows] = await db.query(
+            "SELECT * FROM files WHERE download_id = ?",
+            [downloadId]
+        );
 
         if (rows.length === 0)
             return res.status(404).json({ error: "File non trovato" });
 
         const file = rows[0];
-        const filePath = path.join("/app/uploads", String(file.user_id), file.filename);
+        const filePath = path.join(
+            "/app/uploads",
+            String(file.user_id),
+            file.filename
+        );
 
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
@@ -95,22 +113,43 @@ const FilesController = {
             return res.status(400).json({ error: "Nuovo nome mancante" });
         }
 
-        const [rows] = await db.query("SELECT * FROM files WHERE download_id = ?", [downloadId]);
+        const [rows] = await db.query(
+            "SELECT * FROM files WHERE download_id = ?",
+            [downloadId]
+        );
 
         if (rows.length === 0)
             return res.status(404).json({ error: "File non trovato" });
 
-        await db.query("UPDATE files SET original_name = ? WHERE download_id = ?", [newName, downloadId]);
+        await db.query(
+            "UPDATE files SET original_name = ? WHERE download_id = ?",
+            [newName, downloadId]
+        );
 
         res.status(200).json({ message: "Nome aggiornato con successo" });
     },
 
     getSharedFile: async (req, res) => {
         const { download_id } = req.params;
-        const userId = req.user?.id;
+        let username = null;
+
+        const authHeader = req.headers["authorization"];
+        if (authHeader) {
+            try {
+                const token = authHeader.split(" ")[1];
+                const decoded = jwt.verify(token, SECRET);
+                username = decoded.username;
+                console.log("✅ Username nel token:", username);
+            } catch (err) {
+                console.warn("⚠️ Token non valido o scaduto");
+            }
+        }
 
         try {
-            const [rows] = await db.query("SELECT * FROM files WHERE download_id = ?", [download_id]);
+            const [rows] = await db.query(
+                "SELECT * FROM files WHERE download_id = ?",
+                [download_id]
+            );
             if (!rows || rows.length === 0) {
                 return res.status(404).json({ message: "File non trovato" });
             }
@@ -123,19 +162,44 @@ const FilesController = {
 
             if (file.shared_mode === "private") {
                 const allowed = JSON.parse(file.shared_with || "[]");
-                if (!userId || !allowed.includes(String(userId))) {
+                console.log("📜 Utenti autorizzati:", allowed);
+
+                if (!username) {
+                    console.warn(
+                        "⚠️ Nessun username nel token, accesso negato"
+                    );
+                    return res.status(403).json({ message: "Accesso negato" });
+                }
+
+                const normalizedAllowed = allowed
+                    .map((u) => u?.toLowerCase?.())
+                    .filter(Boolean);
+
+                if (!normalizedAllowed.includes(username.toLowerCase())) {
+                    console.warn(
+                        "⚠️ Username non presente tra gli autorizzati:",
+                        username,
+                        normalizedAllowed
+                    );
                     return res.status(403).json({ message: "Accesso negato" });
                 }
             }
 
-            const filePath = path.join("/app/uploads", String(file.user_id), file.filename);
+            const filePath = path.join(
+                "/app/uploads",
+                String(file.user_id),
+                file.filename
+            );
+
             if (!fs.existsSync(filePath)) {
-                return res.status(404).json({ message: "File mancante sul server" });
+                return res
+                    .status(404)
+                    .json({ message: "File mancante sul server" });
             }
 
             return res.download(filePath, file.original_name);
         } catch (err) {
-            console.error("Errore getSharedFile:", err);
+            console.error("❌ Errore getSharedFile:", err);
             res.status(500).json({ message: "Errore interno del server" });
         }
     },
@@ -152,12 +216,22 @@ const FilesController = {
             );
 
             if (rows.length === 0) {
-                return res.status(404).json({ error: "File non trovato o non autorizzato" });
+                return res
+                    .status(404)
+                    .json({ error: "File non trovato o non autorizzato" });
             }
 
             let sharedWithJson = null;
             if (shared_mode === "private" && Array.isArray(shared_with)) {
-                sharedWithJson = JSON.stringify(shared_with.map(String));
+                const [rows] = await db.query(
+                    `SELECT username FROM users WHERE username IN (${shared_with
+                        .map(() => "?")
+                        .join(",")})`,
+                    shared_with
+                );
+
+                const validUsernames = rows.map((row) => row.username);
+                sharedWithJson = JSON.stringify(validUsernames);
             }
 
             await db.query(
@@ -165,7 +239,9 @@ const FilesController = {
                 [is_shared, shared_mode || null, sharedWithJson, downloadId]
             );
 
-            res.status(200).json({ message: "Condivisione aggiornata con successo" });
+            res.status(200).json({
+                message: "Condivisione aggiornata con successo",
+            });
         } catch (err) {
             console.error("❌ updateSharing error:", err.message);
             res.status(500).json({ error: "Errore interno del server" });
