@@ -100,11 +100,11 @@ if ($status === 200) {
             <select id="sharedMode">
                 <option value="">-- Seleziona --</option>
                 <option value="public">Pubblica (chiunque col link)</option>
-                <!-- <option value="private">Privata (solo utenti specifici)</option> -->
+                <option value="private">Privata (solo utenti specifici)</option>
             </select><br>
 
-            <!-- <label>Utenti autorizzati (solo per privata):</label>
-            <input type="text" id="sharedWith" placeholder="ID utente separati da virgola"><br> -->
+            <label>Utenti autorizzati (solo per privata):</label>
+            <input type="text" id="sharedWith" placeholder="ID utente separati da virgola"><br>
 
             <button id="saveShare">💾 Salva</button>
             <p id="shareLink" style="margin-top: 10px;"></p>
@@ -168,9 +168,9 @@ if ($status === 200) {
             const isShared = document.getElementById('isShared').checked;
             // const isShared = true;
             const mode = document.getElementById('sharedMode').value;
-            // const sharedWith = document.getElementById('sharedWith').value
-            //     .split(',').map(s => s.trim()).filter(Boolean);
-            const sharedWith = Array(0);
+            const sharedWith = document.getElementById('sharedWith').value
+                .split(',').map(s => s.trim()).filter(Boolean);
+            // const sharedWith = Array(0);
 
             const res = await fetch(`http://localhost:3001/files/${id}/share`, {
                 method: "PUT",
@@ -188,7 +188,7 @@ if ($status === 200) {
             const result = await res.json();
 
             if (res.ok) {
-                const shareUrl = `${window.location.origin}/api/files/shared/${id}`;
+                const shareUrl = `${window.location.origin}/share.php?download_id=${id}`;
                 document.getElementById('shareLink').innerHTML = `
             ✅ Condivisione aggiornata!<br>
             <input type="text" readonly value="${shareUrl}" onclick="this.select()">
