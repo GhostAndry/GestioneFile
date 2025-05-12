@@ -140,6 +140,7 @@ const FilesController = {
         let username = null;
 
         const authHeader = req.headers["authorization"];
+        console.log("📜 Header di autorizzazione:", authHeader);
         if (authHeader) {
             try {
                 const token = authHeader.split(" ")[1];

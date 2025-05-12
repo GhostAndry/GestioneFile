@@ -100,11 +100,11 @@ if ($status === 200) {
             <select id="sharedMode">
                 <option value="">-- Seleziona --</option>
                 <option value="public">Pubblica (chiunque col link)</option>
-                <option value="private">Privata (solo utenti specifici)</option>
+                <!-- <option value="private">Privata (solo utenti specifici)</option> -->
             </select><br>
 
-            <label>Utenti autorizzati (solo per privata):</label>
-            <input type="text" id="sharedWith" placeholder="ID utente separati da virgola"><br>
+            <!-- <label>Utenti autorizzati (solo per privata):</label>
+            <input type="text" id="sharedWith" placeholder="ID utente separati da virgola"><br> -->
 
             <button id="saveShare">💾 Salva</button>
             <p id="shareLink" style="margin-top: 10px;"></p>
@@ -166,9 +166,11 @@ if ($status === 200) {
         document.getElementById('saveShare').onclick = async () => {
             const id = document.getElementById('saveShare').dataset.id;
             const isShared = document.getElementById('isShared').checked;
+            // const isShared = true;
             const mode = document.getElementById('sharedMode').value;
-            const sharedWith = document.getElementById('sharedWith').value
-                .split(',').map(s => s.trim()).filter(Boolean);
+            // const sharedWith = document.getElementById('sharedWith').value
+            //     .split(',').map(s => s.trim()).filter(Boolean);
+            const sharedWith = Array(0);
 
             const res = await fetch(`http://localhost:3001/files/${id}/share`, {
                 method: "PUT",
