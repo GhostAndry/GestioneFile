@@ -38,7 +38,10 @@ const FilesController = {
                     download_id: downloadId,
                 });
             }
-
+            console.log(
+                `📂 File caricati con successo per l'utente ${userId}:`,
+                savedFiles
+            );
             res.status(200).json(savedFiles);
         } catch (err) {
             console.error("❌ Upload error:", err.message);
@@ -51,6 +54,7 @@ const FilesController = {
         const [rows] = await db.query("SELECT * FROM files WHERE user_id = ?", [
             userId,
         ]);
+        console.log(`📂 Files List for id ${userId}:`, rows);
         res.status(200).json(rows);
     },
 
@@ -76,6 +80,8 @@ const FilesController = {
                 .status(404)
                 .json({ error: "File non trovato sul server" });
 
+        console.log("📂 File path:", filePath);
+        console.log("📂 File data:", file);
         res.download(filePath, file.original_name);
     },
 
