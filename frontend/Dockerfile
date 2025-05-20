@@ -10,9 +10,10 @@ RUN docker-php-ext-install session
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Permessi sessioni
-RUN mkdir -p /var/lib/php/sessions \
-    && chown -R www-data:www-data /var/lib/php/sessions \
-    && chmod 700 /var/lib/php/sessions
+
+RUN mkdir -p /tmp/php-sessions
+RUN chown -R 33:33 /tmp/php-sessions  # 33 = www-data
+RUN chmod -R 700 /tmp/php-sessions
 
 # Copia tutti i file nel container
 COPY . /var/www/html
