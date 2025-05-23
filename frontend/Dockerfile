@@ -10,7 +10,6 @@ RUN docker-php-ext-install session
 COPY php.ini /usr/local/etc/php/conf.d/custom.ini
 
 # Permessi sessioni
-
 RUN mkdir -p /tmp/php-sessions
 RUN chown -R 33:33 /tmp/php-sessions  # 33 = www-data
 RUN chmod -R 700 /tmp/php-sessions
